@@ -41,7 +41,7 @@ funcShaded <- function(fscore = .7,
 
 beta <- 0.3
 df.out <- expand.grid(recall = seq(0, 1, .0001),
-                      fscore = seq(0.1, .9, .05))
+                      fscore = seq(0.1, .9, .1))
 
 df.out$precision <- Precision_FScore(fscore = df.out$fscore,
                                      recall = df.out$recall,
