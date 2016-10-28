@@ -1,8 +1,5 @@
 
 
-
-
-
 # Set working directory and location of packages
 #.libPaths( c( .libPaths(), 'location-of-packages') )
 #setwd('')
@@ -11,43 +8,50 @@ library(dplyr)
 library(randomForest)
 library(foreach)
 library(doSNOW)
+library(quantmod)
 
 NUM_OF_PROCESSOR <- 4
 cluster <-
   registerDoSNOW(makeCluster(NUM_OF_PROCESSOR, type = "SOCK"))
 
 rf.model <- function(formula,
-                     input,
+                     input.train,
+                     importance = FALSE,
                      ntree = 256,
-                     seed.value = 1234) {
-  set.seed(seed.value)
-  
+                     model.path = '.', # Path to save the model
+                     model.name = '') # Name of model to save
+  {
   #  start.time <- Sys.time()
-  model.rf <-
-    randomForest(
-      formula = formula,
-      data = input,
-      importance = FALSE,
-      keep.forest = TRUE,
-      ntree = ntree
-    )
+  model.rf <- randomForest(
+    formula = formula,
+    data = input.train,
+    importance = importance,
+    keep.forest = TRUE,
+    ntree = ntree
+  )
   #  end.time <- Sys.time()
   #  time.taken <- end.time - start.time
   # print(paste('time: ', time.taken))
   
-  return(model.rf)
-  
+  if( model.name != '' )
+    saveRDS(model.rf, file = file.path(model.path, 
+                                       paste0(model.name, '.rds')))
+  model.rf
+}
+
+rf.predict <- function(..., input.test) {
+  predict(rf.model(...), input.test)
 }
 
 # Parallel Random Forest
 rf.model.parallel <-
   function(formula,
            input.train,
-           input.test,
            n.tree = 256,
-           seed.value = 1234) {
-    set.seed(seed.value)
-    
+           importance = FALSE,
+           model.path = '.', # Path to save the model
+           model.name = '') # Name of model to save
+  {
     ## Multiprocessor RF
     model.rf <-
       foreach(
@@ -58,58 +62,73 @@ rf.model.parallel <-
       randomForest(
         formula = formula,
         data = input.train,
-        importance = FALSE,
+        importance = importance,
         keep.forest = TRUE,
         ntree = ntree
       )
     
-    return(predict(model.rf, input.test))
+    if( model.name != '' )
+      saveRDS(model.rf, file = file.path(model.path, 
+                                         paste0(model.name, '.rds')))
     
+    model.rf
   }
+
+
+rf.parallel.predict <- function(..., input.test) {
+  predict(rf.model.parallel(...), input.test)
+}
 
 
 #**
 rf.leave_one_out <-
   function(formula = formula,
            input = input,
-           ntree = 256,
-           seed.value = 1234)
+           ntree = 256)
   {
-    set.seed(seed.value)
-    
     result <-
-      foreach(
-        ind = 1:nrow(input),
-        .combine = 'c'
-      ) %do% {
-        rf.model.parallel(
-          formula = formula,
-          input.train = input[-ind,],
-          input.test = input[ind,]
-        )
-      }
+      foreach(ind = 1:nrow(input),
+              .combine = 'c') %do% {
+                rf.parallel.predict(
+                  formula = formula,
+                  input.train = input[-ind, ],
+                  input.test = input[ind, ]
+                )
+              }
+    
     result
   }
 
 
+
+## TEST
 data(mtcars)
 formula <- as.formula('mpg ~ .')
-rf.model(formula = formula,
-         input = mtcars)
+
+## TEST
+# one core random forest
+model.rf <- rf.model(formula = formula, input = mtcars)
+
+## TEST
+# one core random forest
+rf.predict(formula = formula,
+           input.train = mtcars[-1,],
+           input.test = mtcars[1,])
 
 
-# rf.model.parallel example
-cat(paste0(
-  'Prediction = ',
-  rf.model.parallel(
-    formula = formula,
-    input.train = mtcars[-1, ],
-    input.test  = mtcars[1, ]
-  ) %>% round(3),
-  ' -- ',
-  'Actual Value = ',
-  mtcars[1, 'mpg']
-))
+## TEST
+# Parallel Random Forest
+rf.model.parallel(formula = formula,
+                  input.train = mtcars,
+                  model.name = 'test')
 
+
+## TEST
+# Parallel random forest
+rf.parallel.predict(formula = formula,
+                    input.train = mtcars[-1, ],
+                    input.test = mtcars[1, ])
+
+## TEST
 # rf.leave_one_out Example
 rf.leave_one_out(formula = formula, input = mtcars)
