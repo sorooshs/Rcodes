@@ -1,7 +1,6 @@
 
-library(dplyr)
-library(ggplot2)
-library(data.table)
+library(pacman)
+p_load(dplyr, ggplot2, data.table)
 
 impFeatures <- function(model.rf = model.rf,
                         type = 1,
@@ -24,10 +23,10 @@ impFeatures <- function(model.rf = model.rf,
   
   # create importance data.frame
   imp.dplr <-
-    tbl_dt(as.table(imp)) %>%
-    select(-V2) %>%
-    dplyr::rename(feature = V1) %>%
-    dplyr::rename(importance = N) %>%
+    tbl_df(as.table(imp)) %>%
+    select(-Var2) %>%
+    dplyr::rename(feature = Var1) %>%
+    dplyr::rename(importance = n) %>%
     arrange(-importance)
   
   # Remove scientific notation and print

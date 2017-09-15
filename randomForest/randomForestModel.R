@@ -4,13 +4,16 @@
 #.libPaths( c( .libPaths(), 'location-of-packages') )
 #setwd('')
 
-library(dplyr)
-library(randomForest)
-library(foreach)
-library(doSNOW)
-library(quantmod)
+# library(dplyr)
+# library(randomForest)
+# library(foreach)
+# library(doSNOW)
+# library(quantmod)
 
-NUM_OF_PROCESSOR <- 4
+library(pacman)
+p_load(dplyr, randomForest, foreach, doSNOW, quantmod)
+
+NUM_OF_PROCESSOR <- 8
 cluster <-
   registerDoSNOW(makeCluster(NUM_OF_PROCESSOR, type = "SOCK"))
 
