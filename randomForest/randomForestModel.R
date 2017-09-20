@@ -105,33 +105,33 @@ rf.leave_one_out <-
 
 
 ## TEST
-data(mtcars)
-formula <- as.formula('mpg ~ .')
-
-## TEST
-# one core random forest
-model.rf <- rf.model(formula = formula, input = mtcars)
-
-## TEST
-# one core random forest
-rf.predict(formula = formula,
-           input.train = mtcars[-1,],
-           input.test = mtcars[1,])
-
-
-## TEST
-# Parallel Random Forest
-rf.model.parallel(formula = formula,
-                  input.train = mtcars,
-                  model.name = 'test')
-
-
-## TEST
-# Parallel random forest
-rf.parallel.predict(formula = formula,
-                    input.train = mtcars[-1, ],
-                    input.test = mtcars[1, ])
-
-## TEST
-# rf.leave_one_out Example
-rf.leave_one_out(formula = formula, input = mtcars)
+# data(mtcars)
+# formula <- as.formula('Final_Stage + Opp_Duplicate + Conversion_Prospecting + Initial_Meeting + RFP_Submitted + Verbal IO_Issued ~ IO_Signed-Counter_Signed')
+# 
+# ## TEST
+# # one core random forest
+# model.rf <- rf.model(formula = formula, input = mtcars)
+# 
+# ## TEST
+# # one core random forest
+# rf.predict(formula = formula,
+#            input.train = mtcars[-1,],
+#            input.test = mtcars[1,])
+# 
+# 
+# ## TEST
+# # Parallel Random Forest
+# rf.model.parallel(formula = formula,
+#                   input.train = mtcars,
+#                   model.name = 'test')
+# 
+# 
+# ## TEST
+# # Parallel random forest
+# rf.parallel.predict(formula = formula,
+#                     input.train = mtcars[-1, ],
+#                     input.test = mtcars[1, ])
+# 
+# ## TEST
+# # rf.leave_one_out Example
+# rf.leave_one_out(formula = formula, input = mtcars)

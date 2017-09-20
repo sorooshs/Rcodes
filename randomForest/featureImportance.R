@@ -1,9 +1,9 @@
 
 library(pacman)
-p_load(dplyr, ggplot2, data.table)
+p_load(dplyr, ggplot2, data.table, extrafont, ggthemes)
 
 impFeatures <- function(model.rf = model.rf,
-                        type = 1,
+                        type = 2,
                         plot = T) 
 {
 
@@ -16,17 +16,14 @@ impFeatures <- function(model.rf = model.rf,
   imp.impurity <-
     importance(model.rf, type = 2) 
   
-  if(type == 1)
-    imp <- imp.accuracy
-  else
-    imp <- imp.impurity
+  imp <- imp.impurity
   
   # create importance data.frame
   imp.dplr <-
-    tbl_df(as.table(imp)) %>%
-    select(-Var2) %>%
-    dplyr::rename(feature = Var1) %>%
-    dplyr::rename(importance = n) %>%
+    as.data.table(as.table(imp)) %>%
+    select(-V2) %>%
+    dplyr::rename(feature = V1) %>%
+    dplyr::rename(importance = N) %>%
     arrange(-importance)
   
   # Remove scientific notation and print
@@ -34,7 +31,7 @@ impFeatures <- function(model.rf = model.rf,
   
   # Plot importance
   if(plot)
-    varImpPlot(model.rf, type = 1)
+    varImpPlot(model.rf, type = 2)
   
   imp.dplr
 }
@@ -80,20 +77,20 @@ barPlot <- function(data,
     ) 
 
   # Load themes
-  theme.file.location.1 <- '../ggplot2/ggplot_themes.R'
-  theme.file.location.2 <- 'ggplot_themes.R'
+  # theme.file.location.1 <- '../ggplot2/ggplot_themes.R'
+  # theme.file.location.2 <- 'ggplot_themes.R'
   
-  if (file.exists(theme.file.location.1)) 
-  {
-    source(theme.file.location.1)
-    plot.bar.imp <- plot.bar.imp + theme.fantasy.simple
-  }
-
-  if (file.exists(theme.file.location.2))  
-  {
-    source(theme.file.location.2)
-    plot.bar.imp <- plot.bar.imp + theme.fantasy.simple
-  }
+  # if (file.exists(theme.file.location.1)) 
+  # {
+  #   source(theme.file.location.1)
+  #   plot.bar.imp <- plot.bar.imp + theme.fantasy.simple
+  # }
+  # 
+  # if (file.exists(theme.file.location.2))  
+  # {
+  #   source(theme.file.location.2)
+  #   plot.bar.imp <- plot.bar.imp + theme.fantasy.simple
+  # }
 
   if (plot.name != '')
     ggsave(file = file.path(plot.path,
@@ -102,16 +99,17 @@ barPlot <- function(data,
            width = 15, height = 12.7, units = 'in')
   
   plot.bar.imp
+  
 }
 
 
-## TEST
-model.rf <- rf.model(formula = formula, 
-                     input = mtcars,
-                     importance = TRUE)
-
-## TEST
-impFeatures <- impFeatures(model.rf)
-
-## TEST
-barPlot(impFeatures)
+# ## TEST
+# model.rf <- rf.model(formula = formula, 
+#                      input = mtcars,
+#                      importance = TRUE)
+# 
+# ## TEST
+# impFeatures <- impFeatures(model.rf)
+# 
+# ## TEST
+# barPlot(impFeatures)
